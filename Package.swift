@@ -14,7 +14,7 @@ let package = Package(
             targets: ["MyUIUtilities"]),
     ],
     dependencies: [
-                .package(url: "https://github.com/MRamadann/UIPackage", from: "2.0.0")
+        .package(url: "https://github.com/MRamadann/MyUIUtilities.git", from: "1.0.0")
     ],
     targets: [
         .target(
