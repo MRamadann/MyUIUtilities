@@ -13,5 +13,15 @@ extension UIButton {
         backgroundColor = .blue
         setTitleColor(.white, for: .normal)
     }
+    
+    func setBorder(color: UIColor, width: CGFloat) {
+            layer.borderColor = color.cgColor
+            layer.borderWidth = width
+        }
+    
+    func roundCorners(radius: CGFloat) {
+           layer.cornerRadius = radius
+           layer.masksToBounds = true
+       }
 }
 
