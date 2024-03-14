@@ -8,23 +8,23 @@
 import UIKit
 
 open class NibLoadingView: UIView {
-  var contentView: UIView?
+  var nibView: UIView?
     
   public override init(frame: CGRect) {
     super.init(frame: frame)
-    commonInit()
+    nibSetup()
   }
     
   required public init?(coder aDecoder: NSCoder) {
     super.init(coder: aDecoder)
-    commonInit()
+    nibSetup()
   }
     
-  private func commonInit() {
+  private func nibSetup() {
     guard let view = loadViewFromNib() else { return }
     view.frame = bounds
     addSubview(view)
-    contentView = view
+    nibView = view
     view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
   }
     
