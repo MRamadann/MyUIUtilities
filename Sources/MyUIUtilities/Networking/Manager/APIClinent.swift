@@ -7,27 +7,22 @@
 
 import Foundation
 
-// Protocol defining an API client
 protocol APIClient {
-    var session: URLSession { get } // URLSession for network tasks
+    var session: URLSession { get }
     
-    // Function to call API with specified request, decode response, and handle completion
     func callAPI<T: Decodable> (with request: URLRequest, decode: @escaping (Decodable) -> T?,
                               completion: @escaping (Result<T, APIError>) -> Void)
 }
 
-// Extension to provide default implementation for APIClient protocol
+// Extension to default implementation for APIClient protocol
 extension APIClient {
-    // Typealias for completion handler in data task
-    typealias jsonTaskCompletionHandler = (Decodable?, APIError?) -> Void
     
-    // Function to create data task for decoding response
-    private func decodingTask<T: Decodable> (with request: URLRequest, decodingType: T.Type, completion: @escaping jsonTaskCompletionHandler) -> URLSessionDataTask {
+    // create data task for decoding response
+    private func decodingTask<T: Decodable> (with request: URLRequest, decodingType: T.Type, completion: @escaping (Decodable?, APIError?) -> Void) -> URLSessionDataTask {
         
         let task = session.dataTask(with: request) { (data, response, error) in
-            // Check if response is HTTPURLResponse
             guard let httpResponse = response as? HTTPURLResponse else {
-                completion(nil, .requestFailed) // Invoke completion with requestFailed error
+                completion(nil, .requestFailed) // If there is no response from network
                 return
             }
             
@@ -36,29 +31,28 @@ extension APIClient {
                 if let data = data {
                     do {
                         // Decode JSON response to specified type
-                        let genericModel = try JSONDecoder().decode(decodingType, from: data)
-                        completion(genericModel, nil) // Invoke completion with decoded model
+                        let result = try JSONDecoder().decode(T.self, from: data)
+                        completion(result, nil)
                     } catch {
-                        completion(nil, .jsonConversionFailure) // Invoke completion with jsonConversionFailure error
+                        completion(nil, .jsonConversionFailure)
                     }
                 } else {
-                    completion(nil, .invalidData) // Invoke completion with invalidData error
+                    completion(nil, .invalidData)
                 }
             } else {
-                completion(nil, .responseUnsuccessful) // Invoke completion with responseUnsuccessful error
+                completion(nil, .responseUnsuccessful)
             }
         }
-        return task // Return URLSessionDataTask
+        return task 
     }
     
-    // Function to call API with specified request, decode response, and handle completion
+    // call API with specified request, decode response, and handle completion
     func callAPI<T: Decodable> (with request: URLRequest, decode: @escaping (Decodable) -> T?,
                               completion: @escaping (Result<T, APIError>) -> Void) {
         let task = decodingTask(with: request, decodingType: T.self) { (json, error) in
             
             // Switch to main queue
             DispatchQueue.main.async {
-                // Check if JSON response exists
                 guard let json = json else {
                     if let error = error {
                         completion(Result.failure(error)) // Invoke completion with provided error
@@ -70,13 +64,13 @@ extension APIClient {
                 
                 // Decode JSON and handle completion
                 if let value = decode(json) {
-                    completion(Result.success(value)) // Invoke completion with decoded value
+                    completion(Result.success(value))
                 } else {
-                    completion(Result.failure(.jsonParsingFailure)) // Invoke completion with jsonParsingFailure error
+                    completion(Result.failure(.jsonParsingFailure))
                 }
             }
         }
-        task.resume() // Resume URLSessionDataTask
+        task.resume()
     }
 }
 

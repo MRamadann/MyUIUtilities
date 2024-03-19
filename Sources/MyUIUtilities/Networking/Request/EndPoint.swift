@@ -25,14 +25,12 @@ enum HTTPMethod: String {
 
 // Define a struct representing an endpoint
 public struct Endpoint {
-    var path: String                // Endpoint path
-    var httpMethod: HTTPMethod      // HTTP method (GET, POST, etc.)
-    var headers: HTTPHeaders?       // HTTP headers
-    var body: Data?                 // Request body
-    var queryItems: [URLQueryItem]? // Query items for the URL
+    var path: String
+    var httpMethod: HTTPMethod
+    var headers: HTTPHeaders?
+    var body: Data?
+    var queryItems: [URLQueryItem]?
 }
-
-// MARK: - Request Setup
 
 extension Endpoint {
     
@@ -48,11 +46,11 @@ extension Endpoint {
     // Computed property to generate URLRequest for the endpoint
     var request: URLRequest {
         var request = URLRequest(url: urlComponents.url!)
-        request.httpMethod  = httpMethod.rawValue // Set HTTP method
-        request.httpBody    = body // Set request body
+        request.httpMethod  = httpMethod.rawValue
+        request.httpBody    = body
         if  let headers = headers {
             for(headerField, headerValue) in headers {
-                request.setValue(headerValue, forHTTPHeaderField: headerField) // Set HTTP headers
+                request.setValue(headerValue, forHTTPHeaderField: headerField)
             }
         }
         request.httpShouldHandleCookies = true

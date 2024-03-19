@@ -15,19 +15,19 @@ enum APIError: Error {
     case jsonParsingFailure      // Error for failed JSON parsing
     case responseUnsuccessful    // Error for unsuccessful API response
     
-    // Computed property to provide a localized description for each error
+
     var localizedDescription: String {
         switch self {
         case .invalidData:
-            return "Invalid Data" // Description for invalid data error
+            return "Invalid Data"
         case .requestFailed:
-            return "Request Failed" // Description for request failed error
+            return "Request Failed"
         case .jsonConversionFailure:
-            return "JSON Conversion Failure" // Description for JSON conversion failure error
+            return "JSON Conversion Failure"
         case .jsonParsingFailure:
-            return "JSON Parsing Failure" // Description for JSON parsing failure error
+            return "JSON Parsing Failure"
         case .responseUnsuccessful:
-            return "Response Unsuccessful" // Description for unsuccessful API response error
+            return "Response Unsuccessful"
         }
     }
 }
