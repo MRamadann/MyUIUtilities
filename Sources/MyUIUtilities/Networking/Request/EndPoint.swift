@@ -36,7 +36,7 @@ extension Endpoint {
     
     // Computed property to generate URL components for the endpoint
     var urlComponents: URLComponents {
-        let base: String = "your/base/string"
+        let base: String = ""
         var component = URLComponents(string: base)!
         component.path = path
         component.queryItems = queryItems
