@@ -7,27 +7,25 @@
 
 import Foundation
 
-// Enum defining different API errors
-enum APIError: Error {
-    case invalidData             // Error for invalid data received
-    case requestFailed           // Error for failed API request
-    case jsonConversionFailure   // Error for failed JSON conversion
-    case jsonParsingFailure      // Error for failed JSON parsing
-    case responseUnsuccessful    // Error for unsuccessful API response
+public enum RequestError: Error {
+    case decode
+    case invalidURL
+    case noResponse
+    case unauthorized
+    case unexpectedStatusCode
+    case unknown
+    case encode
     
-
-    var localizedDescription: String {
+    var customMessage: String {
         switch self {
-        case .invalidData:
-            return "Invalid Data"
-        case .requestFailed:
-            return "Request Failed"
-        case .jsonConversionFailure:
-            return "JSON Conversion Failure"
-        case .jsonParsingFailure:
-            return "JSON Parsing Failure"
-        case .responseUnsuccessful:
-            return "Response Unsuccessful"
+        case .encode:
+            return "encode error"
+        case .decode:
+            return "Decode error"
+        case .unauthorized:
+            return "Session expired"
+        default:
+            return "Unknown error"
         }
     }
 }

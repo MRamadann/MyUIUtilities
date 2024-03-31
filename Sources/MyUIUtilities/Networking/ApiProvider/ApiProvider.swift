@@ -21,5 +21,4 @@ class APIProvider {
             throw error
         }
     }
-    
 }

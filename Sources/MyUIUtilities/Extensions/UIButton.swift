@@ -19,9 +19,5 @@ extension UIButton {
             layer.borderWidth = width
         }
     
-    func roundCorners(radius: CGFloat) {
-           layer.cornerRadius = radius
-           layer.masksToBounds = true
-       }
 }
 

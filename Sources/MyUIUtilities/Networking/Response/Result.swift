@@ -8,7 +8,7 @@
 import Foundation
 
 // Enum defining a generic result type
-enum Result<T, E> where E: Error {
+public enum Result<T, E> where E: Error {
     case success(T)
     case failure(E)
 }
