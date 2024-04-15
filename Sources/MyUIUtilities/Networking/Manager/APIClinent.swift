@@ -6,60 +6,39 @@
 //
 
 import Foundation
+import Combine
 
-public protocol HTTPClient {
-   func sendRequest<T: Decodable>(endpoint: Endpoint, responseModel: T.Type) async -> Result<T, RequestError>
+protocol APIClient {
+    associatedtype EndpointType: Endpoint
+    func request<T: Decodable>(_ endpoint: EndpointType) -> AnyPublisher<T, Error>
 }
 
 @available(iOS 15.0, *)
-extension HTTPClient {
-   public func sendRequest<T: Decodable>(
-        endpoint: Endpoint,
-        responseModel: T.Type
-    )
-     async -> Result<T, RequestError> {
-        var urlComponents = URLComponents()
-//        urlComponents.scheme = endpoint.scheme
-//        urlComponents.host = endpoint.host
-        urlComponents.path = endpoint.path
+public class URLSessionAPIClient<EndpointType: Endpoint>: APIClient {
+   public init () {
         
-        guard let url = urlComponents.url else {
-            return .failure(.invalidURL)
-        }
-        
+    }
+    public func request<T>(_ endpoint: EndpointType) -> AnyPublisher<T, Error> where T : Decodable {
+        let url = endpoint.baseURL.appendingPathComponent(endpoint.path)
         var request = URLRequest(url: url)
-         request.httpMethod = endpoint.method.rawValue
+        request.httpMethod = endpoint.method.rawValue
+        request.httpBody = endpoint.body
         request.allHTTPHeaderFields = endpoint.header
-
-//        if let body = endpoint.body {
-//            request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: [])
-//        }
-         if let body = endpoint.body {
-             do {
-                 request.httpBody = try JSONEncoder().encode(body)
-             } catch {
-                 print("Error encoding request body: \(error)")
-                 return .failure(.encode)
-             }
-         }
-         do {
-            let (data, response) = try await URLSession.shared.data(for: request, delegate: nil)
-            guard let response = response as? HTTPURLResponse else {
-                return .failure(.noResponse)
-            }
-            switch response.statusCode {
-            case 200...299:
-                guard let decodedResponse = try? JSONDecoder().decode(responseModel, from: data) else {
-                    return .failure(.decode)
-                }
-                return .success(decodedResponse)
-            case 401:
-                return .failure(.unauthorized)
-            default:
-                return .failure(.unexpectedStatusCode)
-            }
-        } catch {
-            return .failure(.unknown)
-        }
+//        endpoint.header?.forEach { request.addValue($0.value, forHTTPHeaderField: $0.key) }
+        
+        return URLSession.shared.dataTaskPublisher(for: request)
+                   .subscribe(on: DispatchQueue.global(qos: .background))
+                   .tryMap { data, response -> Data in
+                       guard let httpResponse = response as? HTTPURLResponse,
+                             (200...299).contains(httpResponse.statusCode) else {
+                           throw RequestError.noResponse
+                       }
+                       return data
+                   }
+                   .decode(type: T.self, decoder: JSONDecoder())
+                   .eraseToAnyPublisher()
+            
     }
 }
+
+
